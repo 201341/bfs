@@ -3,7 +3,7 @@
 在BFS中，nameserver负责管理文件元信息以及所有chunkserver的状态信息，是整个系统中唯一拥有全局信息的模块，同时也成为了系统的单点。nameserver的不可用会直接导致文件系统的瘫痪，于是提高nameserver的可用性至关重要。  
 ## 整体设计
 如下图所示，我们将nameserver扩展为集群，Client只与集群Leader进行交互。每一个nameserver中有一个同步模块（Sync），负责集群间的状态同步，保证元数据的一致性。  
-<img src="https://github.com/bluebore/bfs/blob/master/resources/images/ha-1.png" width = "600" height = "200" alt="图片名称" align=center />
+<img src="https://github.com/baidu/bfs/blob/master/resources/images/ha-1.png" width = "600" height = "200" alt="图片名称" align=center />
 
 * Sync模块  
 Sync模块主要有两个功能，选主和日志同步。选主操作就是在nameserver中确定唯一一个Leader，并且在Leader异常后迅速选出新任Leader。日志同步操作实际上就是同步Nameserver中所有需要落地的数据写操作。Sync模块设计为与Nameserver松耦合，仅暴露必须接口，内部可以采用任意一致性协议实现。这样的设计使得我们可以实现多种一致性方案，以满足不同程度的可用性及性能需求。当前我们采用Raft协议实现。  
@@ -17,12 +17,12 @@ Nameserver中的从实例不直接与Client进行交互，也不会给Chunkserve
 ##主要操作流程方案一
 * 写  
 在BFS中，有三种操作会产生元数据写操作：Create，Delete和Rename。操作流程如下图所示，  
-<img src="https://github.com/bluebore/bfs/blob/master/resources/images/ha-2.png" width = "400" height = "400" alt="图片名称" align=center />
+<img src="https://github.com/baidu/bfs/blob/master/resources/images/ha-2.png" width = "400" height = "400" alt="图片名称" align=center />
 
 
 Client向Leader Nameserver发起请求，Leader收到请求后，检查操作合法性。如果操作是合法的，Leader将需要落地的数据通过Sync扩散给从Nameserver。Sync模块返回扩散成功后，Leader向Client返回操作成功。  
 检查合法性可以并发执行，串行向Sync提交结果，Sync模块严格按照这个顺序扩散，扩散成功后Leader才可以将结果写进数据库。但是这样Leader的性能瓶颈就在于Sync的扩散，当Nameserver集群跨机房跨地域部署时，这样的延时是不能接受的。于是我们对这里进行了如下图所示的优化。  
-<img src="https://github.com/bluebore/bfs/blob/master/resources/images/ha-3.png" width = "200" height = "400" alt="图片名称" align=center />
+<img src="https://github.com/baidu/bfs/blob/master/resources/images/ha-3.png" width = "200" height = "400" alt="图片名称" align=center />
 
 Leader在收到操作后先对数据库打一个快照，检查完合法性后，在提交给Sync之前就将数据写入本地数据库。之后再将操作提交给Sync，Sync返回扩散成功后，Leader将快照删除并给向Client返回成功。在Sync返回成功前，所有的读请求都会读快照之前的数据，也就是说Client不会读到还未扩散成功的数据。  
 
