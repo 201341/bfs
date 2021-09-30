@@ -9,7 +9,7 @@ BFS的issue，Todo List 和 RoadMap 中会注明该条目完成后对BFS产生�
 	* 1点：拼写错误、代码风格修正，文档完善补充
 	* 2点：小bug修复，简单功能实现	
 	* 3点：重要bug修复，功能实现	
-	* 6点：核心feature实现			 
+	* 6点：核心feature实现			
 以上为参考标准，特殊情况可由committer商议决定。Contributor 提出 issue 但未实现的由committer 商议决定贡献值。
 
 ## Committer标准
