@@ -6,7 +6,11 @@
 #include "chunkserver/block_manager.h"
 
 #include <sys/stat.h>
+#if defined(__APPLE__)
+#include <sys/mount.h>
+#else
 #include <sys/vfs.h>
+#endif
 #include <climits>
 #include <functional>
 #include <algorithm>

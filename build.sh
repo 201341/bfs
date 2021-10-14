@@ -27,8 +27,8 @@ cd ${DEPS_SOURCE}
 if [ ! -f "${FLAG_DIR}/boost_1_57_0" ] \
     || [ ! -d "${DEPS_PREFIX}/boost_1_57_0/boost" ]; then
     if [ -e boost_1_57_0.tar.gz  ]; then
-        rm boost_1_57_0.tar.gz 
-    fi 
+        rm boost_1_57_0.tar.gz
+    fi
     wget --no-check-certificate https://raw.githubusercontent.com/lylei9/boost_1_57_0/master/boost_1_57_0.tar.gz
     tar zxf boost_1_57_0.tar.gz
     rm -rf ${DEPS_PREFIX}/boost_1_57_0

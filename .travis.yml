@@ -36,7 +36,7 @@ install:
     - tar xf v2.1.2.tar.gz
     - ( cd gflags-2.1.2 && cmake -DCMAKE_INSTALL_PREFIX=$DEPS_PREFIX -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC && make -j4 && sudo make install )
 
-    - git clone -b cpp11 https://github.com/baidu/common
+    - git clone -b cpp11 https://github.com/201341/common
     - ( cd common && sed -i '/^PREFIX=.*/d' config.mk && echo "PREFIX=$DEPS_PREFIX" >> config.mk && make -j4 && sudo make install)
 
     - git clone https://github.com/yvxiang/gtest.git

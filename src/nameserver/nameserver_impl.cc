@@ -1268,7 +1268,7 @@ bool NameServerImpl::WebService(const sofa::pbrpc::HTTPRequest& request,
     } else if (path == "/dfs/overload") {
         display_mode = kOverload;
     } else if (path == "/dfs/set") {
-        std::map<const std::string, std::string>::const_iterator it = request.query_params->begin();
+        std::map<std::string, std::string>::const_iterator it = request.query_params->begin();
         Params p;
         if (it != request.query_params->end()) {
             int32_t v = 0;
@@ -1321,7 +1321,7 @@ bool NameServerImpl::WebService(const sofa::pbrpc::HTTPRequest& request,
             return true;
         }
     } else if (path == "/dfs/namespace") {
-        std::map<const std::string, std::string>::const_iterator it = request.query_params->begin();
+        std::map<std::string, std::string>::const_iterator it = request.query_params->begin();
         std::string path;
         if (it == request.query_params->end()) {
             path = "/";

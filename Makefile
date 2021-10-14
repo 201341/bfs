@@ -1,6 +1,6 @@
 
-# OPT ?= -O2 -DNDEBUG # (A) Production use (optimized mode)
-OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
+OPT ?= -O2 -g2 -DNDEBUG # (A) Production use (optimized mode)
+# OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 # OPT ?= -O2 -g2 -DNDEBUG # (C) Profiling mode: opt, but w/debugging symbols
 
 include depends.mk
@@ -10,7 +10,7 @@ INCLUDE_PATH = -I./src -I$(PROTOBUF_PATH)/include \
                -I$(PBRPC_PATH)/include \
                -I$(LEVELDB_PATH)/include \
                -I$(SNAPPY_PATH)/include \
-               -I$(GFLAG_PATH)/include \
+			   -I$(GFLAG_PATH)/include \
                -I$(COMMON_PATH)/include
 
 LDFLAGS = -L$(PBRPC_PATH)/lib -lsofa-pbrpc \
@@ -20,7 +20,12 @@ LDFLAGS = -L$(PBRPC_PATH)/lib -lsofa-pbrpc \
           -L$(GFLAG_PATH)/lib -lgflags \
           -L$(GTEST_PATH)/lib -lgtest \
           -L$(TCMALLOC_PATH)/lib -ltcmalloc_minimal \
-          -L$(COMMON_PATH)/lib -lcommon -lpthread -lz -lrt
+          -L$(COMMON_PATH)/lib -lcommon -lpthread -lz
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	LDFLAGS += -lrt
+endif
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
 	      -shared -Wl,--version-script,so-version-script # hide symbol of thirdparty libs
@@ -195,14 +200,13 @@ libbfs.a: $(SDK_OBJ) $(OBJS) $(PROTO_HEADER)
 
 libbfs_c.so: src/sdk/bfs_c.cc src/sdk/bfs_c.h libbfs.a
 	g++ $(CXXFLAGS) -shared -fPIC $(INCLUDE_PATH) -o $@ src/sdk/bfs_c.cc  \
-	            -Xlinker "-(" libbfs.a \
+	             libbfs.a \
 		thirdparty/lib/libprotobuf.a \
 		thirdparty/lib/libsofa-pbrpc.a \
 		thirdparty/lib/libsnappy.a \
 		thirdparty/lib/libgflags.a \
 		thirdparty/lib/libcommon.a \
-		-lpthread  -lrt -lz -ldl \
-		-Xlinker "-)"
+		-lpthread -lz -ldl
 
 bfs_client: $(CLIENT_OBJ) $(LIBS)
 	$(CXX) $(CLIENT_OBJ) $(LIBS) -o $@ $(LDFLAGS)
